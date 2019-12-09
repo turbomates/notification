@@ -1,0 +1,4 @@
+bot.microsoftAppId = de5a
+bot.microsoftAppPassword = CC
+bot.serverURL = http://localhost:49269
+bot.name = CLEAN CODE GUARD

@@ -8,39 +8,36 @@ import com.turbomates.corebot.botmessage.MessageSender
 import com.turbomates.corebot.botmessage.OutcomeMessage
 import com.turbomates.corebot.botmessage.Sender
 import com.turbomates.corebot.conversation.ConversationAdapter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BotEngineMain {
 
     private val messages = Channel<OutcomeMessage>()
     private val authorization = Channel<String>()
+    private lateinit var config: BotConfig
 
-    fun build(): ConversationAdapter
+    fun setup(id: String, pass: String, name: String, serverUrl: String): ConversationAdapter
     {
+        config = BotConfig(BotAuth(id, pass), BotSenderData(id, name, serverUrl))
         return ConversationAdapter(messages)
     }
 
-    suspend fun sendMessages() {
+    suspend fun start() = withContext(Dispatchers.Default) {
 
-        val microsoftAuthorise = MicrosoftAuthorise(
-            BotAuth("5", "CC")
-        )
+        launch {
+            val microsoftAuthorise = MicrosoftAuthorise(config.botAuth)
+            Authorization.keepBotAuthorized(microsoftAuthorise, authorization)
+        }
 
-        Authorization.keepBotAuthorized(microsoftAuthorise, authorization)
+        launch {
+            val messageSender = MessageSender(config.botSenderData, authorization)
+            Sender.sendOutcomeMessages(messageSender, messages)
 
-    }
-
-    suspend fun keepBotAuthorized()
-    {
-        val messageSender = MessageSender(
-            BotSenderData(
-                "5de0",
-                "bot name",
-                "http://localhost:58425"
-            ),
-            authorization
-        )
-
-        Sender.sendOutcomeMessages(messageSender, messages)
+        }
     }
 }
+
+private data class BotConfig(val botAuth: BotAuth, val botSenderData: BotSenderData)
