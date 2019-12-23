@@ -41,5 +41,4 @@ dependencies {
     implementation "io.ktor:ktor-gson:$ktor_version"
     implementation "com.google.inject:guice:4.1.0"
     implementation "io.ktor:ktor-client-gson:$ktor_version"
-    compile "com.natpryce:konfig:1.6.10.0"
 }

@@ -14,8 +14,4 @@ data class IncomeActivity (
 
 data class Member (val id: String, val name: String)
 
-data class ConversationId (val id: String) {
-    override fun toString(): String {
-        return id
-    }
-}
+data class ConversationId (val id: String)

@@ -8,6 +8,7 @@ import com.turbomates.corebot.botmessage.MessageSender
 import com.turbomates.corebot.botmessage.OutcomeMessage
 import com.turbomates.corebot.botmessage.Sender
 import com.turbomates.corebot.conversation.ConversationAdapter
+import com.turbomates.corebot.conversation.storage.InMemory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -17,12 +18,13 @@ class BotEngineMain {
 
     private val messages = Channel<OutcomeMessage>()
     private val authorization = Channel<String>()
+    private val storage = InMemory()
     private lateinit var config: BotConfig
 
     fun setup(id: String, pass: String, name: String, serverUrl: String): ConversationAdapter
     {
         config = BotConfig(BotAuth(id, pass), BotSenderData(id, name, serverUrl))
-        return ConversationAdapter(messages)
+        return ConversationAdapter(storage, messages)
     }
 
     suspend fun start() = withContext(Dispatchers.Default) {

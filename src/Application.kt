@@ -7,9 +7,9 @@ import io.ktor.gson.*
 import com.google.inject.*
 import com.turbomates.api.controller.Router
 import com.turbomates.corebot.conversation.ConversationAdapter
-import com.natpryce.konfig.*
 import com.turbomates.corebot.BotEngineMain
 import com.turbomates.echobot.EchoBotModule
+import com.typesafe.config.ConfigFactory
 import kotlinx.coroutines.launch
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -28,17 +28,15 @@ fun Application.module(testing: Boolean = false)  {
         }
     }
 
-    val config = EnvironmentVariables() overriding
-            ConfigurationProperties.fromResource("properties") overriding
-            ConfigurationProperties.fromResource("properties_")
+    val config = ConfigFactory.load()
 
     val botEngine = BotEngineMain()
     //@todo setup returns conversation adapter
     val conversationAdapter = botEngine.setup(
-        config[bot.microsoftAppId],
-        config[bot.microsoftAppPassword],
-        config[bot.name],
-        config[bot.serverURL]
+        config.getString("bot.microsoftAppId"),
+        config.getString("bot.microsoftAppPassword"),
+        config.getString("bot.name"),
+        config.getString("bot.serverURL")
     )
 
     Guice.createInjector(MainModule(this, conversationAdapter), EchoBotModule())
@@ -55,11 +53,4 @@ class MainModule(private val application: Application, private val conversationA
         bind(Router::class.java).asEagerSingleton()
         bind(ConversationAdapter::class.java).toInstance(conversationAdapter)
     }
-}
-
-object bot: PropertyGroup() {
-    val microsoftAppId by stringType
-    val microsoftAppPassword by stringType
-    val name by stringType
-    val serverURL by stringType
 }

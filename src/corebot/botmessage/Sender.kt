@@ -38,21 +38,16 @@ class MessageSender(
             throw Exception("Could find authorization for send message")
         }
 
-        when (message) {
-            is Text -> {
-                client.post<Any>(
-                    "${senderData.serverUrl}/v3/conversations/${message.conversationId}/activities",
-                    MessageData("message", message.text, Member(senderData.id, senderData.name)),
-                    listOf(
-                        Header(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
-                        Header(HttpHeaders.Authorization, currentAuthorization!!)
-                    )
-                )
-            }
-            else -> throw Exception("Don't know how to send this message")
-        }
+        client.post<Any>(
+            "${senderData.serverUrl}/v3/conversations/${message.conversationId.id}/activities",
+            Body("message", message.text, Member(senderData.id, senderData.name)),
+            listOf(
+                Header(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+                Header(HttpHeaders.Authorization, currentAuthorization!!)
+            )
+        )
     }
 }
 
-private data class MessageData(val type: String, val text: String, val from: Member)
+private data class Body(val type: String, val text: String, val from: Member)
 data class BotSenderData(val id: String, val name: String, val serverUrl: String)

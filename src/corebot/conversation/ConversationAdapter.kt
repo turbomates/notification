@@ -1,27 +1,24 @@
 package com.turbomates.corebot.conversation
 
 import com.turbomates.corebot.botmessage.OutcomeMessage
-import com.turbomates.corebot.botmessage.Text
+import com.turbomates.corebot.conversation.storage.Storage
 import com.turbomates.corebot.incomeactivity.ConversationId
-import com.turbomates.corebot.incomeactivity.Member
 import kotlinx.coroutines.channels.Channel
 
 class ConversationAdapter (
+    private val storage: Storage,
     private val channel: Channel<OutcomeMessage>
 ) {
 
-    suspend fun write(message: String, conversation: Conversation) {
-        //@todo save conversation state
-        channel.send(Text(message, conversation.id))
-    }
-
-    suspend fun greet(message: String, member: Member, conversation: Conversation) {
-        //@todo save conversation state
-        channel.send(Text(message, conversation.id))
+    suspend fun write(message: OutcomeMessage) {
+        channel.send(message)
+        val conversation = gatherConversation(message.conversationId)
+        conversation.push(message)
+        storage.save(conversation)
     }
 
     fun gatherConversation(conversationId: ConversationId): Conversation
-    {//@todo build conversation with state here
-        return Conversation(conversationId)
+    {
+        return storage.get(conversationId)
     }
 }
