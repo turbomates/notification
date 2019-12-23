@@ -3,10 +3,7 @@ package com.turbomates.corebot
 import com.turbomates.corebot.botauth.Authorization
 import com.turbomates.corebot.botauth.BotAuth
 import com.turbomates.corebot.botauth.MicrosoftAuthorise
-import com.turbomates.corebot.botmessage.BotSenderData
-import com.turbomates.corebot.botmessage.MessageSender
-import com.turbomates.corebot.botmessage.OutcomeMessage
-import com.turbomates.corebot.botmessage.Sender
+import com.turbomates.corebot.botmessage.*
 import com.turbomates.corebot.conversation.ConversationAdapter
 import com.turbomates.corebot.conversation.storage.InMemory
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +15,7 @@ class BotEngineMain {
 
     private val messages = Channel<OutcomeMessage>()
     private val authorization = Channel<String>()
+    private val bindings = Channel<ExternalIdBinding>()
     private val storage = InMemory()
     private lateinit var config: BotConfig
 
@@ -35,8 +33,13 @@ class BotEngineMain {
         }
 
         launch {
-            val messageSender = MessageSender(config.botSenderData, authorization)
+            val messageSender = MessageSender(config.botSenderData, authorization, bindings)
             Sender.sendOutcomeMessages(messageSender, messages)
+
+        }
+
+        launch {
+            Binding.bindOutcomeMessages(storage, bindings)
 
         }
     }
