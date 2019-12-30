@@ -3,16 +3,16 @@ package com.turbomates.corebot.botmessage
 import com.turbomates.corebot.incomeactivity.ConversationId
 import java.util.*
 
-class OutcomeMessage(val text: String, val conversationId: ConversationId) {
+class OutcomeMessage(val message: String, val conversationId: ConversationId) {
     val id = MessageId()
     private var externalId: ExternalId? = null
 
-    fun wasSent(externalId: ExternalId) {
+    fun linkWithExternalId(externalId: ExternalId) {
         this.externalId = externalId
     }
 }
 
-class MessageId(){
+class MessageId {
     val id = UUID.randomUUID()
 }
 

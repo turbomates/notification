@@ -7,13 +7,13 @@ import com.turbomates.corebot.incomeactivity.ConversationId
 
 class Conversation (val id: ConversationId){
 
-    private val outcomeMessages = mutableMapOf<MessageId, OutcomeMessage>()
+    private val outcomeMessages = mutableListOf<OutcomeMessage>()
 
     fun push(message: OutcomeMessage) {
-        outcomeMessages[message.id] = message
+        outcomeMessages.add(message)
     }
 
-    fun messageWasSent(messageId: MessageId, externalId: ExternalId) {
-        outcomeMessages[messageId]?.let { outcomeMessage: OutcomeMessage ->  outcomeMessage.wasSent(externalId) }
+    fun messageExternalLink(messageId: MessageId, externalId: ExternalId) {
+        outcomeMessages.findLast { it.id == messageId }?.let { outcomeMessage: OutcomeMessage ->  outcomeMessage.linkWithExternalId(externalId) }
     }
 }
