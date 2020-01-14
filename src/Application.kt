@@ -10,6 +10,10 @@ import com.turbomates.corebot.conversation.ConversationAdapter
 import com.turbomates.corebot.BotEngineMain
 import com.turbomates.echobot.EchoBotModule
 import com.typesafe.config.ConfigFactory
+import io.ktor.auth.Authentication
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.basic
+import io.ktor.locations.Locations
 import kotlinx.coroutines.launch
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -17,6 +21,8 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false)  {
+
+    val config = ConfigFactory.load()
 
     install(CallLogging) {
         level = Level.INFO
@@ -27,8 +33,18 @@ fun Application.module(testing: Boolean = false)  {
             setPrettyPrinting()
         }
     }
-
-    val config = ConfigFactory.load()
+    install(Locations)
+    install(Authentication) {
+        basic(name = "notification") {
+            validate { credentials ->
+                if (credentials.name == config.getString("notification.name") && credentials.password == config.getString("notification.password")){
+                    UserIdPrincipal(credentials.name)
+                } else {
+                    null
+                }
+            }
+        }
+    }
 
     val botEngine = BotEngineMain()
     //@todo setup returns conversation adapter
