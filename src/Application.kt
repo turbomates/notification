@@ -1,20 +1,24 @@
 package com.turbomates
 
-import io.ktor.application.*
-import io.ktor.features.*
-import org.slf4j.event.*
-import io.ktor.gson.*
-import com.google.inject.*
+import com.google.inject.AbstractModule
+import com.google.inject.Guice
 import com.turbomates.api.controller.Router
-import com.turbomates.corebot.conversation.ConversationAdapter
 import com.turbomates.corebot.BotEngineMain
+import com.turbomates.corebot.conversation.ConversationAdapter
 import com.turbomates.echobot.EchoBotModule
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.application.Application
+import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
 import io.ktor.auth.basic
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DataConversion
+import io.ktor.gson.gson
 import io.ktor.locations.Locations
-import kotlinx.coroutines.launch
+import org.slf4j.event.Level
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -22,7 +26,6 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false)  {
 
-    val config = ConfigFactory.load()
 
     install(CallLogging) {
         level = Level.INFO
@@ -34,6 +37,10 @@ fun Application.module(testing: Boolean = false)  {
         }
     }
     install(Locations)
+
+
+    val config = ConfigFactory.load()
+
     install(Authentication) {
         basic(name = "notification") {
             validate { credentials ->
@@ -46,27 +53,22 @@ fun Application.module(testing: Boolean = false)  {
         }
     }
 
-    val botEngine = BotEngineMain()
-    //@todo setup returns conversation adapter
-    val conversationAdapter = botEngine.setup(
-        config.getString("bot.microsoftAppId"),
-        config.getString("bot.microsoftAppPassword"),
-        config.getString("bot.name"),
-        config.getString("bot.serverURL")
-    )
-
-    Guice.createInjector(MainModule(this, conversationAdapter), EchoBotModule())
-    launch {
-        botEngine.start()
-    }
+    Guice.createInjector(MainModule(this, config), EchoBotModule())
 }
 
-
-class MainModule(private val application: Application, private val conversationAdapter: ConversationAdapter): AbstractModule() {
+class MainModule(private val application: Application, private val config: Config): AbstractModule() {
 
     override fun configure() {
         bind(Application::class.java).toInstance(application)
         bind(Router::class.java).asEagerSingleton()
+
+
+        val conversationAdapter = BotEngineMain.setup(
+            config.getString("bot.microsoftAppId"),
+            config.getString("bot.microsoftAppPassword"),
+            config.getString("bot.name"),
+            config.getString("bot.serverURL")
+        )
         bind(ConversationAdapter::class.java).toInstance(conversationAdapter)
     }
 }
