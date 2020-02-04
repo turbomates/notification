@@ -4,11 +4,11 @@ import com.google.inject.Inject
 import com.turbomates.corebot.Bot
 import com.turbomates.corebot.botmessage.OutcomeMessage
 import com.turbomates.corebot.incomeactivity.Member
-import com.turbomates.corebot.conversation.ConversationAdapter
+import com.turbomates.corebot.conversation.Conversation
 import com.turbomates.corebot.incomeactivity.ConversationId
 
 class EchoBot @Inject constructor(
-    private val adapter: ConversationAdapter
+    private val adapter: Conversation
 ): Bot
 {
     override suspend fun onPersonsAdded(membersAdded: List<Member>, conversationId: ConversationId) {

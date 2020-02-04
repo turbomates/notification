@@ -39,5 +39,5 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.5.9'
     implementation "io.ktor:ktor-locations:$ktor_version"
     implementation "io.ktor:ktor-gson:$ktor_version"
-    implementation 'com.turbomates:corebot:1.1.2'
+    implementation 'com.turbomates:corebot:1.1.8'
 }

@@ -3,8 +3,8 @@ package com.turbomates
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.turbomates.api.controller.Router
-import com.turbomates.corebot.BotEngineMain
-import com.turbomates.corebot.conversation.ConversationAdapter
+import com.turbomates.corebot.ConversationFactory
+import com.turbomates.corebot.conversation.Conversation
 import com.turbomates.echobot.EchoBotModule
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -63,12 +63,12 @@ class MainModule(private val application: Application, private val config: Confi
         bind(Router::class.java).asEagerSingleton()
 
 
-        val conversationAdapter = BotEngineMain.setup(
+        val conversation = ConversationFactory.setup(
             config.getString("bot.microsoftAppId"),
             config.getString("bot.microsoftAppPassword"),
             config.getString("bot.name"),
             config.getString("bot.serverURL")
         )
-        bind(ConversationAdapter::class.java).toInstance(conversationAdapter)
+        bind(Conversation::class.java).toInstance(conversation)
     }
 }
